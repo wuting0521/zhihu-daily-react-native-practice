@@ -8,41 +8,11 @@ import {
   Image
 } from 'react-native';
 
-const latest_news_list = "https://news-at.zhihu.com/api/4/news/latest"
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  rightContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    marginLeft: 8,
-    textAlign: 'left',
-  },
-  image: {
-    width: 80,
-    height: 80,
-    marginBottom: 8,
-    marginTop: 8,
-    marginRight: 8
-  },
-  listView: {
-    paddingTop: 64,
-    backgroundColor: '#F5FCFF',
-  }
-});
-
 class ZHDNewsList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loaded: false,
+      isLoaded: false,
       dataSource: new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       }),
@@ -62,7 +32,7 @@ class ZHDNewsList extends Component {
       .then((json) => {
         // console.log('[ZHDNewsList][Network][Response] response items: ' + json.stories);
         this.setState( {
-          loaded: true,
+          isLoaded: true,
           dataSource: this.state.dataSource.cloneWithRows(json.stories),
           message: "Loaded"
         });
@@ -77,7 +47,7 @@ class ZHDNewsList extends Component {
   }
 
   render() {
-    if (!this.state.loaded) {
+    if (!this.state.isLoaded) {
       return this.renderLoadingView();
     }
 
@@ -113,5 +83,35 @@ class ZHDNewsList extends Component {
     );
   }
 }
+
+const latest_news_list = "https://news-at.zhihu.com/api/4/news/latest";
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
+  },
+  rightContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    marginLeft: 8,
+    textAlign: 'left',
+  },
+  image: {
+    width: 80,
+    height: 80,
+    marginBottom: 8,
+    marginTop: 8,
+    marginRight: 8
+  },
+  listView: {
+    paddingTop: 64,
+    backgroundColor: '#F5FCFF',
+  }
+});
 
 module.exports = ZHDNewsList;
