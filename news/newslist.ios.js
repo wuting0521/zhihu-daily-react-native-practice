@@ -15,6 +15,7 @@ class ZHDNewsList extends Component {
     this.state = {
       isRefreshing: false,
       isLoaded: false,
+      isLoading: false,
       dataSource: new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
       }),
@@ -53,7 +54,22 @@ class ZHDNewsList extends Component {
           message: "Error"
         });
       })
-      .done()
+      .done();
+  }
+
+  onEndReached() {
+    console.log('onEndReached()');
+    this.fetchHistoricalData();
+  }
+
+  fetchHistoricalData() {
+    if (this.state.isLoading) {
+      console.log('fetchHistoricalData() is in the middle of loading more');
+      return;
+    }
+    this.setState({
+      isLoading: true
+    });
   }
 
   render() {
@@ -68,6 +84,7 @@ class ZHDNewsList extends Component {
           <RefreshControl
             refreshing={this.state.isRefreshing}
             onRefresh={this.fetchData.bind(this)} />}
+        onEndReached={this.onEndReached.bind(this)}
         dataSource={this.state.dataSource}
         renderRow={this.renderNewsItem.bind(this)}
         style={styles.listView} />
