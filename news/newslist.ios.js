@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 var newsList = []
-var latestDate = '';
+var latestDate = "";
 
 class ZHDNewsList extends Component {
   constructor(props) {
@@ -43,12 +43,20 @@ class ZHDNewsList extends Component {
       .then((response) => response.json())
       .then((json) => {
         // console.log('[ZHDNewsList][Network][Response] response items: ' + json.stories);
+        // console.log('fetchData() with json.stories are array: ' + Array.isArray(newsList));
+        newsList = [];
+        // newsList.concat.call(json.stories);
+        for (var i = 0; i < json.stories.length; i++) {
+          newsList.push(json.stories[i]);
+        }
+        console.log('fetchData() with newsList: ' + newsList);
         this.setState( {
           isRefreshing: false,
           isLoaded: true,
-          dataSource: this.state.dataSource.cloneWithRows(json.stories),
+          dataSource: this.state.dataSource.cloneWithRows(newsList),
           message: "Loaded"
         });
+        latestDate = json.date;
       })
       .catch((error) => {
         // console.log('[ZHDNewsList][Network][Error]fetchData() with error: ' + error);
@@ -70,13 +78,38 @@ class ZHDNewsList extends Component {
       console.log('fetchHistoricalData() is in the middle of loading more');
       return;
     }
-    if (latestDate.localeCompare('')) {
+    if (latestDate == "") {
       console.log('fetchHistoricalData() parameter error, latestDate can\'t be empty');
       return;
     }
     this.setState({
       isLoading: true
     });
+    var historicalUrl = historical_news_lst + latestDate;
+    console.log('fetchHistoricalData() with url:' + historicalUrl);
+    fetch(historicalUrl)
+      .then((response) => {
+        console.log('fetchHistoricalData() on response with ' + response);
+        return response.json();
+      })
+      .then((json) => {
+        console.log('fetchHistoricalData() on parsed response with json: ' + json.date + '\ndata:' + json.stories);
+        for (var i = 0; i < json.stories.length; i++) {
+          newsList.push(json.stories[i]);
+        }
+        this.setState({
+          isLoading: false,
+          dataSource: this.state.dataSource.cloneWithRows(newsList)
+        });
+        latestDate = json.date;
+      })
+      .catch((error) => {
+        console.error('fetchHistoricalData() error with ' + error);
+        this.setState({
+          isLoading: false
+        });
+      })
+      .done()
   }
 
   render() {
@@ -127,6 +160,7 @@ class ZHDNewsList extends Component {
 }
 
 const latest_news_list = "https://news-at.zhihu.com/api/4/news/latest";
+const historical_news_lst = "https://news-at.zhihu.com/api/4/news/before/";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
