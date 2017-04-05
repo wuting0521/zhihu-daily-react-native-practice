@@ -72,13 +72,17 @@ class ZHDNewsList extends Component {
   renderNewsItem(item) {
     // console.log('[ZHDNewsList][UI]render list cell item: ' + item.images);
     return(
-      <View style={styles.container}>
-        <View style={styles.rightContainer}>
-          <Text style={styles.title}>{item.title}</Text>
+      <View>
+        <View style={styles.container}>
+          <View style={styles.rightContainer}>
+            <Text style={styles.title}>{item.title}</Text>
+          </View>
+          <Image
+            source={{uri: item.images[0]}}
+            style={styles.image} />
         </View>
-        <Image
-          source={{uri: item.images[0]}}
-          style={styles.image} />
+        <View style={styles.separator}>
+        </View>
       </View>
     );
   }
@@ -111,6 +115,10 @@ const styles = StyleSheet.create({
   listView: {
     paddingTop: 64,
     backgroundColor: '#F5FCFF',
+  },
+  separator: {
+    height: 0.5,
+    backgroundColor: '#dddddd'
   }
 });
 
