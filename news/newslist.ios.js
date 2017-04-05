@@ -5,13 +5,15 @@ import {
   ListView,
   View,
   Text,
-  Image
+  Image,
+  RefreshControl
 } from 'react-native';
 
 class ZHDNewsList extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isRefreshing: false,
       isLoaded: false,
       dataSource: new ListView.DataSource({
         rowHasChanged: (r1, r2) => r1 !== r2
@@ -26,12 +28,19 @@ class ZHDNewsList extends Component {
   }
 
   fetchData() {
+    if (this.state.isRefreshing) {
+      console.log('fetchData() in the middle of refreshing');
+    }
+    this.setState({
+      isRefreshing: true
+    });
     // console.log('[ZHDNewsList][Network]fetchData() fetching');
     fetch(latest_news_list)
       .then((response) => response.json())
       .then((json) => {
         // console.log('[ZHDNewsList][Network][Response] response items: ' + json.stories);
         this.setState( {
+          isRefreshing: false,
           isLoaded: true,
           dataSource: this.state.dataSource.cloneWithRows(json.stories),
           message: "Loaded"
@@ -40,6 +49,7 @@ class ZHDNewsList extends Component {
       .catch((error) => {
         // console.log('[ZHDNewsList][Network][Error]fetchData() with error: ' + error);
         this.setState( {
+          isRefreshing: false,
           message: "Error"
         });
       })
@@ -54,6 +64,10 @@ class ZHDNewsList extends Component {
     // console.log('[ZHDNewsList][UI]render list');
     return(
       <ListView
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.isRefreshing}
+            onRefresh={this.fetchData.bind(this)} />}
         dataSource={this.state.dataSource}
         renderRow={this.renderNewsItem.bind(this)}
         style={styles.listView} />
@@ -114,7 +128,7 @@ const styles = StyleSheet.create({
   },
   listView: {
     paddingTop: 64,
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#F5FCFF'
   },
   separator: {
     height: 0.5,
