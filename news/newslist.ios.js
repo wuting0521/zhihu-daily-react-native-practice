@@ -9,6 +9,9 @@ import {
   RefreshControl
 } from 'react-native';
 
+var newsList = []
+var latestDate = '';
+
 class ZHDNewsList extends Component {
   constructor(props) {
     super(props);
@@ -65,6 +68,10 @@ class ZHDNewsList extends Component {
   fetchHistoricalData() {
     if (this.state.isLoading) {
       console.log('fetchHistoricalData() is in the middle of loading more');
+      return;
+    }
+    if (latestDate.localeCompare('')) {
+      console.log('fetchHistoricalData() parameter error, latestDate can\'t be empty');
       return;
     }
     this.setState({
