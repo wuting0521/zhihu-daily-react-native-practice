@@ -9,7 +9,7 @@ import {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#f3f4f5',
   }
 });
 
@@ -21,7 +21,7 @@ export default class ZhihuDaily extends Component {
       <NavigatorIOS
         style={styles.container}
         initialRoute={{
-          title: '知乎日报',
+          title: 'YY LIVE',
           component: ZHDNewsList
         }} />
     );

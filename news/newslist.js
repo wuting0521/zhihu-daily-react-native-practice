@@ -11,6 +11,7 @@ import {
 
 var newsList = []
 var latestDate = "";
+var page = 0;
 
 class ZHDNewsList extends Component {
   constructor(props) {
@@ -46,17 +47,26 @@ class ZHDNewsList extends Component {
         // console.log('fetchData() with json.stories are array: ' + Array.isArray(newsList));
         newsList = [];
         // newsList.concat.call(json.stories);
-        for (var i = 0; i < json.stories.length; i++) {
-          newsList.push(json.stories[i]);
+        // console.log('fetchData()' + json.data[1].data);
+        var data = json.data[1].data;
+        // console.log('fetchData() + data: ' + data);
+        for (var i = 0; i < data.length; i+=2) {
+          var item = [];
+          item.push(data[i]);
+          if (i+1 < data.length) {
+            item.push(data[i+1]);
+          }
+          newsList.push(item);
         }
-        console.log('fetchData() with newsList: ' + newsList);
+        page = 1;
+        // console.log('fetchData() with newsList: ' + newsList);
         this.setState( {
           isRefreshing: false,
           isLoaded: true,
           dataSource: this.state.dataSource.cloneWithRows(newsList),
           message: "Loaded"
         });
-        latestDate = json.date;
+        // latestDate = json.date;
       })
       .catch((error) => {
         // console.log('[ZHDNewsList][Network][Error]fetchData() with error: ' + error);
@@ -78,14 +88,10 @@ class ZHDNewsList extends Component {
       console.log('fetchHistoricalData() is in the middle of loading more');
       return;
     }
-    if (latestDate == "") {
-      console.log('fetchHistoricalData() parameter error, latestDate can\'t be empty');
-      return;
-    }
     this.setState({
       isLoading: true
     });
-    var historicalUrl = historical_news_lst + latestDate;
+    var historicalUrl = historical_news_lst + (page+1);
     console.log('fetchHistoricalData() with url:' + historicalUrl);
     fetch(historicalUrl)
       .then((response) => {
@@ -94,9 +100,22 @@ class ZHDNewsList extends Component {
       })
       .then((json) => {
         console.log('fetchHistoricalData() on parsed response with json: ' + json.date + '\ndata:' + json.stories);
-        for (var i = 0; i < json.stories.length; i++) {
-          newsList.push(json.stories[i]);
+        var data = json.data.data;
+        var lastData = newsList[newsList.length-1];
+        var k = 0;
+        if (lastData.length<2) {
+          lastData.push(data[0]);
+          k = 1
         }
+        for (var i = k; i < data.length; i+=2) {
+          var item = [];
+          item.push(data[i]);
+          if (i+1 < data.length) {
+            item.push(data[i+1]);
+          }
+          newsList.push(item);
+        }
+        page+=1;
         this.setState({
           isLoading: false,
           dataSource: this.state.dataSource.cloneWithRows(newsList)
@@ -142,25 +161,45 @@ class ZHDNewsList extends Component {
 
   renderNewsItem(item) {
     // console.log('[ZHDNewsList][UI]render list cell item: ' + item.images);
-    return(
-      <View>
-        <View style={styles.container}>
-          <View style={styles.rightContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-          </View>
-          <Image
-            source={{uri: item.images[0]}}
-            style={styles.image} />
+    if (item.length < 2) {
+      return (
+        <View>
         </View>
-        <View style={styles.separator}>
+      )
+    }
+
+    var item1 = item[0];
+    var item2 = item[1];
+
+    return(
+      <View style={styles.container}>
+        <View>
+          <Image style={styles.image1}
+            source={{uri: item1.thumb}}>
+              <Text style={styles.tag}>{item1.tag}</Text>
+          </Image>
+          <View style={styles.pannelContainer}>
+            <Text style={styles.title1}>{item1.desc}</Text>
+            <Text style={styles.subTitle1}>{item1.name}</Text>
+          </View>
+        </View>
+        <View>
+          <Image style={styles.image2}
+            source={{uri: item2.thumb}}>
+            <Text style={styles.tag}>{item2.tag}</Text>
+          </Image>
+          <View style={styles.pannelContainer}>
+            <Text style={styles.title2}>{item2.desc}</Text>
+            <Text style={styles.subTitle2}>{item2.name}</Text>
+          </View>
         </View>
       </View>
     );
   }
 }
 
-const latest_news_list = "https://news-at.zhihu.com/api/4/news/latest";
-const historical_news_lst = "https://news-at.zhihu.com/api/4/news/before/";
+const latest_news_list = "https://idx.3g.yy.com/mobyy/nav/index/idx";
+const historical_news_lst = "https://idx.3g.yy.com/mobyy/module/index/idx/8?page=";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -169,20 +208,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  rightContainer: {
+  pannelContainer: {
     flex: 1,
+    flexDirection: 'row'
   },
-  title: {
-    fontSize: 16,
-    marginLeft: 8,
+  title1: {
+    flex:2,
+    fontSize: 10,
     textAlign: 'left',
+    color: '#333333'
   },
-  image: {
-    width: 80,
-    height: 80,
-    marginBottom: 8,
-    marginTop: 8,
-    marginRight: 8
+  subTitle1: {
+    flex:1,
+    fontSize: 8,
+    textAlign: 'right',
+    color: '#666666',
+    marginRight: 4
+  },
+  title2: {
+    flex:2,
+    fontSize: 10,
+    textAlign: 'left',
+    color: '#333333',
+    marginLeft: 4,
+  },
+  subTitle2: {
+    flex:1,
+    fontSize: 8,
+    textAlign: 'right',
+    color: '#666666',
+  },
+  image1: {
+    width: 176,
+    height: 160,
+    marginTop: 4,
+    marginRight: 4,
+    resizeMode: Image.resizeMode.cover
+  },
+  image2: {
+    width: 176,
+    height: 160,
+    marginLeft: 4,
+    marginTop: 4,
+    resizeMode: Image.resizeMode.cover
+  },
+  tag:{
+    fontSize: 8,
+    backgroundColor: 'rgba(0.3, 0.3, 0.3, 0.5)',
+    color: '#ffdd00'
   },
   listView: {
     paddingTop: 64,
