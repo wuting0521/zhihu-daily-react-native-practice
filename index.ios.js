@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
   }
 });
 
-var ZHDNewsList = require('./news/newslist.ios.js');
+var ZHDNewsList = require('./news/newslist.js');
 
 export default class ZhihuDaily extends Component {
   render() {
